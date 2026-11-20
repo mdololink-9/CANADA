@@ -1,0 +1,364 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Canada 2027 — Command Center RCIP / FCIP</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.460.0/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+html{scroll-behavior:smooth}
+*{scrollbar-width:thin;scrollbar-color:rgba(249,115,22,.5) transparent}
+body{background:radial-gradient(1100px 700px at 88% -8%,rgba(124,58,237,.4),transparent 60%),radial-gradient(900px 620px at -8% 45%,rgba(37,99,235,.28),transparent 60%),radial-gradient(800px 600px at 60% 110%,rgba(217,70,239,.16),transparent 60%),#07051A;background-attachment:fixed;color:#e7e5ff;font-family:Inter,sans-serif;overflow-x:hidden}
+h1,h2,h3,.brand{font-family:Sora,Inter,sans-serif;letter-spacing:-.01em}
+.m{font-family:'JetBrains Mono',monospace}
+#c3d{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.blob{position:fixed;z-index:0;pointer-events:none;filter:blur(48px);opacity:.5;animation:mo 14s ease-in-out infinite alternate}
+.bl1{width:46vmax;height:40vmax;left:-16vmax;top:6vh;background:linear-gradient(135deg,#2563eb,#7c3aed)}
+.bl2{width:34vmax;height:30vmax;right:-12vmax;top:40vh;background:linear-gradient(135deg,#d946ef,#7c3aed);animation-delay:-5s}
+.bl3{width:26vmax;height:22vmax;left:30vw;bottom:-12vmax;background:linear-gradient(135deg,#f97316,#d946ef);opacity:.28;animation-delay:-9s}
+@keyframes mo{0%{border-radius:42% 58% 63% 37%/45% 38% 62% 55%}100%{border-radius:61% 39% 38% 62%/58% 64% 36% 42%}}
+#spot{position:fixed;inset:0;z-index:50;pointer-events:none;background:radial-gradient(540px circle at var(--mx,70%) var(--my,25%),rgba(249,115,22,.17),transparent 65%);mix-blend-mode:screen}
+#gate,#app{position:relative;z-index:2}
+.g{position:relative;background:linear-gradient(150deg,rgba(255,255,255,.08),rgba(255,255,255,.02)),rgba(14,10,44,.6);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border:1px solid rgba(255,255,255,.1);border-radius:22px;box-shadow:0 24px 60px -24px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.1)}
+.g::before{content:'';position:absolute;inset:-1px;border-radius:inherit;padding:1.5px;background:radial-gradient(320px circle at var(--x,50%) var(--y,50%),#F97316,rgba(217,70,239,.55) 40%,transparent 70%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .35s;pointer-events:none}
+.g:hover::before{opacity:1}
+.i{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:.6rem .85rem;width:100%;color:#fff;transition:border-color .2s,box-shadow .2s}
+.i:focus{outline:0;border-color:#F97316;box-shadow:0 0 0 3px rgba(249,115,22,.25)}
+.i option{background:#120d3a}
+.b,.b2,.tb{border-radius:999px;padding:.55rem 1.1rem;font-size:.875rem;font-weight:600;cursor:pointer;display:inline-block;white-space:nowrap;transition:transform .2s,box-shadow .2s,background .2s}
+.b{background:linear-gradient(135deg,#FDBA74,#F97316 55%,#EA580C);color:#1c0a00;box-shadow:0 10px 28px -10px rgba(249,115,22,.9)}
+.b:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 34px -8px #F97316}
+.b:disabled{opacity:.4;cursor:not-allowed}
+.b2,.tb{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);color:#e7e5ff}
+.b2:hover,.tb:hover{background:rgba(255,255,255,.11)}
+.tb.on{background:rgba(249,115,22,.2);border-color:#F97316;color:#FFD3A8;box-shadow:0 0 22px -6px #F97316}
+:focus-visible{outline:2px solid #22D3EE;outline-offset:2px}
+.mk{display:block;width:14px;height:14px;border-radius:50%;background:var(--c);border:2px solid #fff;box-shadow:0 0 14px var(--c)}
+#hd{position:sticky;top:12px;z-index:40;padding:0 1rem}
+.hd-in{max-width:72rem;margin:12px auto 0;display:flex;align-items:center;gap:.75rem;padding:.55rem .75rem .55rem 1.2rem;border-radius:999px;background:rgba(12,8,40,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);transition:background .3s}
+#hd.sm .hd-in{background:rgba(12,8,40,.85)}
+.brand{font-weight:800;white-space:nowrap}
+#nav{display:flex;gap:.35rem;overflow-x:auto;flex:1;scrollbar-width:none}
+#hero{min-height:calc(100vh - 90px);display:flex;align-items:center;max-width:72rem;margin:0 auto;padding:2rem 1.25rem}
+.hero-t{font-size:clamp(2.5rem,6.6vw,5.4rem);line-height:1.03;font-weight:800;max-width:11ch}
+.chip{display:inline-block;padding:.3rem .85rem;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);font-size:.75rem;margin:0 .4rem 1rem 0}
+@keyframes up{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:none}}
+#hero .u{animation:up 1s cubic-bezier(.2,.8,.2,1) both}
+#body{scroll-margin-top:100px}
+.rv{opacity:0;transform:translateX(-80px) scale(.96);transition:opacity .8s,transform .9s cubic-bezier(.2,.8,.2,1)}
+.rv.r{transform:translateX(80px) scale(.96)}
+.rv.in{opacity:1;transform:none}
+@media(max-width:760px){.hd-in{flex-wrap:wrap;border-radius:26px}#nav{order:3;flex-basis:100%}}
+#cvout{display:none}
+@media print{body>*:not(#cvout){display:none!important}#cvout{display:block;white-space:pre-wrap;color:#000;background:#fff;font:11pt/1.4 Arial,sans-serif}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.rv{opacity:1;transform:none}}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+html{scroll-behavior:smooth}
+body{background:radial-gradient(900px 600px at 6% -5%,rgba(249,115,22,.2),transparent 60%),radial-gradient(900px 700px at 100% 8%,rgba(139,92,246,.3),transparent 60%),radial-gradient(1000px 800px at 50% 110%,rgba(79,70,229,.32),transparent 60%),#07061A;background-attachment:fixed}
+#stage{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;perspective:1500px;perspective-origin:50% 40%}
+#gate,#app{position:relative;z-index:2}
+#glow{position:fixed;inset:0;z-index:60;pointer-events:none;mix-blend-mode:screen;background:radial-gradient(480px circle at var(--mx,70%) var(--my,25%),rgba(249,115,22,.2),rgba(139,92,246,.1) 45%,transparent 72%)}
+.sh{position:absolute;transform-style:preserve-3d}
+.bl{border-radius:46% 54% 60% 40%/50% 42% 58% 50%;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.4),rgba(139,92,246,.55) 28%,rgba(79,70,229,.4) 60%,rgba(217,70,239,.3));box-shadow:inset 0 -22px 50px rgba(217,70,239,.5),inset 0 12px 30px rgba(255,255,255,.18),0 40px 90px -25px rgba(139,92,246,.6);animation:mph 11s ease-in-out infinite alternate}
+.bl.o{background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.5),rgba(249,115,22,.7) 30%,rgba(154,52,18,.5) 65%,rgba(217,70,239,.2));box-shadow:inset 0 -22px 50px rgba(234,88,12,.5),0 40px 90px -25px rgba(249,115,22,.6)}
+@keyframes mph{to{border-radius:60% 40% 42% 58%/40% 60% 40% 60%;transform:rotate(18deg) scale(1.08)}}
+.sp{display:block;width:var(--z,90px);height:var(--z,90px);border-radius:50%;background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.85),#F97316 22%,#9a3412 62%,#1c0a05);box-shadow:0 30px 60px -20px rgba(249,115,22,.7)}
+.sp.v{background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.8),#8B5CF6 24%,#3b2a8c 62%,#0e0a2e);box-shadow:0 30px 60px -20px rgba(139,92,246,.7)}
+.rg{display:block;width:200px;height:200px;border-radius:50%;border:16px solid rgba(139,92,246,.45);box-shadow:inset 0 0 30px rgba(249,115,22,.35),0 0 40px rgba(139,92,246,.35);animation:rs 18s linear infinite}
+@keyframes rs{from{transform:rotateX(65deg) rotate(0)}to{transform:rotateX(65deg) rotate(360deg)}}
+.c{perspective:600px}
+.cb{position:relative;width:70px;height:70px;transform-style:preserve-3d;animation:cs 16s linear infinite}
+@keyframes cs{from{transform:rotateX(20deg) rotateY(0)}to{transform:rotateX(380deg) rotateY(540deg)}}
+.cb u{position:absolute;inset:0;display:block;border:1px solid rgba(255,255,255,.28);background:linear-gradient(135deg,rgba(139,92,246,.6),rgba(30,20,90,.75))}
+.cb u:nth-child(1){transform:translateZ(35px)}.cb u:nth-child(2){transform:rotateY(90deg) translateZ(35px)}.cb u:nth-child(3){transform:rotateY(180deg) translateZ(35px)}.cb u:nth-child(4){transform:rotateY(-90deg) translateZ(35px)}.cb u:nth-child(5){transform:rotateX(90deg) translateZ(35px)}.cb u:nth-child(6){transform:rotateX(-90deg) translateZ(35px)}
+#dev{position:absolute;left:50%;top:50%;width:340px;height:64px;margin:-32px 0 0 -170px;transform-style:preserve-3d;will-change:transform}
+.bx{position:relative;width:340px;height:64px;transform-style:preserve-3d}
+.f{position:absolute;display:block;border-radius:6px}
+.fr{width:340px;height:64px;transform:translateZ(85px);background:repeating-linear-gradient(90deg,#05060f 0 13px,transparent 13px 19px) 78px 30px/250px 22px no-repeat,repeating-linear-gradient(90deg,#10B981 0 4px,transparent 4px 19px) 82px 18px/250px 4px no-repeat,linear-gradient(#F97316,#F97316) 14px 14px/6px 36px no-repeat,linear-gradient(180deg,#5b4cc4,#33288a 45%,#171046);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 60px rgba(249,115,22,.35)}
+.fr::after{content:'';position:absolute;left:82px;top:18px;width:250px;height:4px;background:repeating-linear-gradient(90deg,#F97316 0 4px,transparent 4px 38px);animation:blk 1.4s steps(2) infinite}
+@keyframes blk{50%{opacity:.1}}
+.bk{width:340px;height:64px;transform:rotateY(180deg) translateZ(85px);background:linear-gradient(180deg,#33288a,#120c36)}
+.tp{width:340px;height:170px;top:-53px;transform:rotateX(90deg) translateZ(32px);background:repeating-linear-gradient(90deg,rgba(0,0,0,.32) 0 3px,transparent 3px 10px),linear-gradient(180deg,#6a5ad8,#3f33a0)}
+.bt{width:340px;height:170px;top:-53px;transform:rotateX(-90deg) translateZ(32px);background:#0c0826}
+.lf,.rt{width:170px;height:64px;left:85px;background:linear-gradient(90deg,#241a66,#4437b0)}
+.lf{transform:rotateY(-90deg) translateZ(170px)}.rt{transform:rotateY(90deg) translateZ(170px)}
+.g{background:radial-gradient(280px circle at var(--lx,-999px) var(--ly,-999px),rgba(249,115,22,.17),transparent 65%),linear-gradient(160deg,rgba(46,28,108,.52),rgba(14,10,42,.66));border:1px solid rgba(167,139,250,.2);border-radius:22px;box-shadow:0 20px 50px -22px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.07)}
+.g:hover{border-color:rgba(249,115,22,.4)}
+#map{overflow:hidden}
+#gate .g{box-shadow:0 30px 90px -20px rgba(139,92,246,.55),0 0 0 1px rgba(249,115,22,.15)}
+#gate h1,#gate h2,#app h1{font-family:Sora,Inter,sans-serif}
+.i{background:rgba(255,255,255,.06);border:1px solid rgba(167,139,250,.28);border-radius:14px}
+.i:focus{outline:none;border-color:#F97316;box-shadow:0 0 0 3px rgba(249,115,22,.25)}
+.b,.b2,.tb{border-radius:999px;transition:transform .2s,box-shadow .2s,background .2s}
+.b{background:linear-gradient(135deg,#FDBA74,#F97316 55%,#EA580C);color:#1a0a02;box-shadow:0 10px 30px -8px rgba(249,115,22,.65)}
+.b:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 16px 38px -8px rgba(249,115,22,.8)}
+.b2,.tb{background:rgba(255,255,255,.05);border:1px solid rgba(167,139,250,.3)}
+.b2:hover,.tb:hover{background:rgba(139,92,246,.22)}
+.tb.on{background:linear-gradient(135deg,rgba(249,115,22,.35),rgba(139,92,246,.3));border-color:#F97316;color:#fff}
+#app>header{top:10px;margin:10px 12px 0;border-radius:24px;border:1px solid rgba(167,139,250,.25)!important;background:rgba(16,10,44,.55)!important}
+@media(min-width:1280px){#app>header{max-width:72rem;margin:10px auto 0}}
+.hd{font:800 clamp(3rem,9vw,6.5rem)/.98 Sora,Inter,sans-serif;letter-spacing:-.03em;background:linear-gradient(100deg,#fff 10%,#fed7aa 45%,#F97316 85%);-webkit-background-clip:text;background-clip:text;color:transparent}
+#hero>div{animation:hin 1s cubic-bezier(.2,.8,.2,1) both}
+@keyframes hin{from{opacity:0;transform:translateX(-80px)}}
+.rv{opacity:0;transform:translateX(var(--rx,-60px)) scale(.96);transition:opacity .8s cubic-bezier(.2,.8,.2,1),transform .8s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+@media(max-width:700px){#dev{opacity:.6}}
+@media(prefers-reduced-motion:reduce){.bl,.cb,.rg,.fr::after,#hero>div{animation:none}}
+</style></head>
+<body>
+<canvas id="c3d"></canvas><div class="blob bl1"></div><div class="blob bl2"></div><div class="blob bl3"></div><div id="spot"></div>
+<div id="gate"></div>
+<div id="app" class="hidden"><header id="hd"><div class="hd-in"><div class="brand">CANADA <span class="m text-orange-400">2027</span></div><nav id="nav"></nav><button class="b2" onclick="lock()"><i data-lucide="lock" class="inline w-4 h-4"></i> Verrouiller</button></div></header>
+<section id="hero"><div><div class="u" style="animation-delay:.1s"><span class="chip">Coffre chiffré AES-256-GCM</span><span class="chip">RCIP + FCIP</span></div><h2 class="hero-t u" style="animation-delay:.25s">Pilote ton projet Canada 2027</h2><p class="u text-slate-300 max-w-md mt-5" style="animation-delay:.4s">Feuille de route, carte des communautés, CRM d’employeurs et documents chiffrés : tout ton dossier au même endroit.</p><div class="u flex flex-wrap gap-3 mt-8" style="animation-delay:.55s"><button class="b" onclick="go('dash');$('#body').scrollIntoView()">Ouvrir le tableau de bord</button><button class="b2" onclick="go('map');$('#body').scrollIntoView()">Explorer la carte</button></div></div></section>
+<main id="body" class="max-w-6xl mx-auto px-4 pb-16"></main></div>
+<div id="modal"></div><div id="cvout"></div><div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 g px-4 py-2 text-sm opacity-0 transition-opacity z-50"></div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TE=new TextEncoder(),TD=new TextDecoder(),rnd=n=>crypto.getRandomValues(new Uint8Array(n));
+const b64=u=>{u=new Uint8Array(u);let s='';for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s)};
+const ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+let KEY=null,S=null,timer=null,urls=[],map=null,lg=null,flt='ALL',cf='',tab='dash',PEND=null;
+const toast=m=>{const t=$('#toast');t.textContent=m;t.style.opacity=1;clearTimeout(t._h);t._h=setTimeout(()=>t.style.opacity=0,2600)};
+/* ---------- IndexedDB ---------- */
+const idb=()=>new Promise((ok,no)=>{const q=indexedDB.open('c27vault',1);q.onupgradeneeded=()=>q.result.createObjectStore('k');q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)});
+const tx=async(m,f)=>{const d=await idb();return new Promise((ok,no)=>{const t=d.transaction('k',m);let r;try{r=f(t.objectStore('k'))}catch(e){no(e)}t.oncomplete=()=>ok(r?r.result:undefined);t.onerror=()=>no(t.error)})};
+const dget=k=>tx('readonly',s=>s.get(k)),dput=(k,v)=>tx('readwrite',s=>s.put(v,k)),ddel=k=>tx('readwrite',s=>s.delete(k)),dclr=()=>tx('readwrite',s=>s.clear());
+const dall=async()=>{const d=await idb();return new Promise(ok=>{const o={},q=d.transaction('k').objectStore('k').openCursor();q.onsuccess=()=>{const c=q.result;if(c){o[c.key]=c.value;c.continue()}else ok(o)}})};
+/* ---------- Crypto: PBKDF2-SHA256 (310k) -> AES-256-GCM ---------- */
+const kdf=async(pw,salt,it)=>{const b=await crypto.subtle.importKey('raw',TE.encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:it||310000,hash:'SHA-256'},b,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])};
+const seal=async d=>{const iv=rnd(12);return{iv,ct:new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},KEY,d))}};
+const unseal=async(o,k)=>new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:o.iv},k||KEY,o.ct));
+const save=async()=>{if(S&&KEY)await dput('state',await seal(TE.encode(JSON.stringify(S))))};
+const sha=async s=>b64(await crypto.subtle.digest('SHA-256',TE.encode(s)));
+/* ---------- TOTP RFC 6238 (HMAC-SHA1) ---------- */
+const B32='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+const b32e=u=>{let b='',o='';for(const x of u)b+=x.toString(2).padStart(8,'0');for(let i=0;i<b.length;i+=5)o+=B32[parseInt(b.slice(i,i+5).padEnd(5,'0'),2)];return o};
+const b32d=s=>{let b='';for(const c of s)b+=B32.indexOf(c).toString(2).padStart(5,'0');const u=new Uint8Array(Math.floor(b.length/8));for(let i=0;i<u.length;i++)u[i]=parseInt(b.slice(i*8,i*8+8),2);return u};
+const hotp=async(sec,c)=>{const k=await crypto.subtle.importKey('raw',b32d(sec),{name:'HMAC',hash:'SHA-1'},false,['sign']),m=new Uint8Array(8),v=new DataView(m.buffer);v.setUint32(0,Math.floor(c/4294967296));v.setUint32(4,c%4294967296);const h=new Uint8Array(await crypto.subtle.sign('HMAC',k,m)),o=h[19]&15,n=(((h[o]&127)<<24)|(h[o+1]<<16)|(h[o+2]<<8)|h[o+3])%1000000;return String(n).padStart(6,'0')};
+const totpOk=async(sec,code)=>{const c=Math.floor(Date.now()/30000);for(const d of[-1,0,1])if(await hotp(sec,c+d)===String(code).trim())return true;return false};
+/* ---------- Brute-force protection ---------- */
+const LK=()=>{try{return JSON.parse(localStorage.getItem('c27lk'))||{n:0,u:0}}catch(e){return{n:0,u:0}}};
+const fail=()=>{const l=LK();l.n++;if(l.n>=3)l.u=Date.now()+Math.min(30*2**(l.n-3),900)*1000;localStorage.setItem('c27lk',JSON.stringify(l))};
+/* ---------- Data ---------- */
+const PL={DUAL:'Double avantage : RCIP + FCIP',PPICF:'FCIP / PPICF',PPICR:'RCIP / PPICR'},COL={DUAL:'#F97316',PPICF:'#10B981',PPICR:'#06B6D4'};
+const PV={ON:'Ontario',MB:'Manitoba',NB:'Nouveau-Brunswick',BC:'Colombie-Britannique',SK:'Saskatchewan',AB:'Alberta',NS:'Nouvelle-Écosse'};
+const C=[['sudbury','Sudbury (Grand Sudbury)','ON','DUAL',46.4917,-80.993,'https://investsudbury.ca',3,'Mines connectées, santé (HSN), MSP et cybersécurité, éducation'],
+['timmins','Timmins','ON','DUAL',48.4758,-81.3305,'https://timminsedc.com',2,'Mines et télécoms industriels, santé, support PME'],
+['superioreast','Supérieur Est (Wawa)','ON','DUAL',47.9942,-84.7731,'https://superioreast.on.ca',1,'Administration municipale, santé, éducation, foresterie'],
+['stpierrejolys','Saint-Pierre-Jolys','MB','PPICF',49.3761,-96.9856,'https://www.villagestpierrejolys.ca',1,'Agroalimentaire, services municipaux, PME'],
+['peninsule','Péninsule acadienne (Caraquet)','NB','PPICF',47.7936,-64.9403,'https://www.csrpa.ca',2,'Pêche et transformation, santé, éducation'],
+['kelowna','Kelowna','BC','PPICF',49.888,-119.496,'https://www.investkelowna.com',3,'Technologie, aérospatiale, santé, services'],
+['northbay','North Bay','ON','PPICR',46.3091,-79.4608,'https://www.investinnorthbay.ca',3,'Cybersécurité, défense, santé, télécoms'],
+['saultstemarie','Sault Ste. Marie','ON','PPICR',46.5219,-84.3461,'https://welcometossm.com',2,'Acier, santé, services publics, TI'],
+['thunderbay','Thunder Bay','ON','PPICR',48.3809,-89.2477,'https://gotothunderbay.ca',3,'Santé, éducation, mines, transport'],
+['brandon','Brandon','MB','PPICR',49.8485,-99.9501,'https://economicdevelopmentbrandon.com',2,'Agro-industrie, santé, éducation'],
+['steinbach','Steinbach','MB','PPICR',49.5258,-96.6845,'https://www.steinbach.ca',2,'Fabrication, commerce, TI pour PME'],
+['moosejaw','Moose Jaw','SK','PPICR',50.3933,-105.5519,'https://moosejaw.ca',2,'Agro-industrie, énergie, défense'],
+['claresholm','Claresholm','AB','PPICR',50.0258,-113.5786,'https://www.claresholm.ca',1,'Agriculture, santé, services municipaux'],
+['westkootenay','West Kootenay (Nelson)','BC','PPICR',49.4928,-117.2948,'https://wkrcip.ca',2,'Technologie, tourisme, santé'],
+['shuswap','Shuswap (Salmon Arm)','BC','PPICR',50.7001,-119.2838,'https://futureshuswap.com',1,'Services, santé, fabrication'],
+['pictou','Pictou County (New Glasgow)','NS','PPICR',45.5926,-62.6455,'https://pictoucountypartnership.com',2,'Industrie, santé, TI']];
+const NOC=[['22220','Techniciens de réseau informatique et de sites Web',2,5,'Network Technician OR Network Administrator OR Fortinet OR FortiGate OR Cisco','technicien réseau OR administrateur réseau OR Fortinet'],
+['22221','Techniciens du soutien aux utilisateurs',2,5,'IT Support Technician OR Help Desk OR Desktop Support OR Service Desk','technicien support OR soutien technique OR help desk'],
+['21222','Spécialistes des systèmes d’information',1,6,'Systems Administrator OR Infrastructure Specialist OR Systems Analyst','administrateur systèmes OR spécialiste infrastructure'],
+['21220','Spécialistes en cybersécurité',1,6,'Cybersecurity Analyst OR Security Administrator OR Firewall','analyste cybersécurité OR sécurité réseau']];
+const R=[['Phase 1 : diplômes et langue',['Ouvrir le dossier ECA (WES) : Master 1 et Licence','Passer le TEF ou TCF Canada (objectif NCLC 7+)','Planifier IELTS ou CELPIP (atout pour le RCIP)']],
+['Phase 2 : image canadienne et LinkedIn',['CV canadien aligné sur les CNP','Profil LinkedIn bilingue optimisé','Attestations de travail détaillées (1 560 h et plus)']],
+['Phase 3 : employeurs désignés',['Lister les employeurs désignés par communauté','Candidatures ciblées (ECA et tests de langue validés)','Préparer les entretiens techniques']],
+['Phase 4 : offre IMM 0247 et recommandation',['Signer l’offre IMM 0247 (temps plein, non saisonnière)','Obtenir la recommandation de la communauté']],
+['Phase 5 : résidence permanente et permis',['Soumettre la demande de RP sur le portail IRCC','Déposer le permis de travail de 2 ans en parallèle']]];
+const T=R.flatMap((p,i)=>p[1].map((t,j)=>['t'+i+'_'+j,t]));
+const D=[['wes','Rapport ECA WES (Master 1, Licence)'],['tef','TEF / TCF Canada'],['ielts','IELTS / CELPIP'],['exp','Attestations d’emploi détaillées (CNP)'],['dipl','Diplômes, relevés, certifications Fortinet et Cisco'],['pass','Passeport biométrique'],['funds','Relevés bancaires des 6 derniers mois'],['pol','Casier judiciaire'],['imm','Formulaire IMM 0247']];
+const LI=[['h','Titre bilingue : Network & Systems Administrator | Fortinet NSE 1-3 | Administrateur réseaux'],['o','Open to Work : Ontario, Manitoba, Nouveau-Brunswick, Colombie-Britannique'],['a','« À propos » mentionnant RCIP/FCIP 2027, ECA et tests de langue'],['p','Projets en vedette : VPN IPsec FortiGate, lab Cisco, guide Windows Server 2019'],['u','URL personnalisée : linkedin.com/in/modibodolo']];
+const ST=['Ciblé','Candidature envoyée','Entretien','Offre IMM 0247','Recommandation communautaire','RP soumise'];
+const F={1:10507,2:13080,3:16080,4:19523};
+const RU=[['Candidatez directement aux employeurs désignés publiés gratuitement par les communautés et Guichet-Emplois.','Ne payez jamais un agent ou « consultant » pour une offre ou une place : aucun quota ne s’achète.'],['Exigez une offre IMM 0247 à temps plein, non saisonnière, d’un employeur désigné.','N’acceptez pas une offre à temps partiel, saisonnière ou d’un employeur non désigné.'],['Gardez vos tâches alignées sur votre CNP (22220, 22221, 21222, 21220), avec attestations détaillées sur papier à en-tête.','Ne fournissez pas un simple certificat de présence sans fonctions, heures ni salaire.'],['Lancez l’ECA (WES) et les tests de langue avant l’offre.','N’attendez pas l’offre pour ouvrir vos dossiers.'],['Constituez des fonds personnels, liquides et traçables sur 6 mois.','Pas de dépôt inexpliqué ni de prêt présenté comme preuve de fonds.'],['CV canadien : sans photo, âge, état civil ni nationalité.','N’achetez aucune « garantie » de résidence permanente.']];
+const PROF={name:'Modibo Dolo',headline:'Administrateur systèmes et réseaux | Sécurité et haute disponibilité',certs:['Fortinet NSE 1-3','Cisco Network Support and Security','CCNA Introduction to Networks','Cisco Introduction to Cybersecurity','Cisco Learn-A-Thon 2026'],skills:['Windows Server 2019/2022','Active Directory / GPO','Linux','Hyper-V','Cisco / OSPF','FortiGate / pfSense','VPN IPsec','Supervision LAN/WAN'],langs:'Français (courant), Anglais (technique professionnel)'};
+const CV=()=>`MODIBO DOLO
+Network & Systems Administrator | Security & High Availability
+Bamako, Mali | +223 82 12 56 73 | dolomodibo33@gmail.com | linkedin.com/in/modibodolo
+Target NOC: 22220, 22221, 21222, 21220 | RCIP / FCIP 2027
+
+SUMMARY
+Network and systems specialist trained in critical banking environments (Bank of Africa Mali head office). Maintains Windows Server, Active Directory, Linux, Hyper-V, Cisco and FortiGate/pfSense infrastructure with Level 1-3 support. Fluent in French, professional technical English.
+
+TECHNICAL SKILLS
+Systems: Windows Server 2019/2022, Active Directory, Group Policy, Ubuntu/Debian, Microsoft 365, Hyper-V
+Network and security: Cisco routing and switching, OSPF, VLAN/trunking, FortiGate, pfSense, IPsec and client-to-site VPN
+Operations: LAN/WAN monitoring, preventive and corrective maintenance, troubleshooting, user support L1-L3
+
+EXPERIENCE
+Network and System Support, Level 2/3 | Creative Techno Mali | Apr 2026 - Present
+- Administer and deploy servers to keep services continuously available
+- Monitor connectivity, configure network devices and optimize data flows
+- Apply security protocols and resolve incidents proactively
+Network & System Administrator, Junior | Creative Techno Mali (on site at BOA-Mali head office) | Apr 2025 - Apr 2026
+- Performed preventive and corrective maintenance of critical equipment at a major bank
+IT Maintenance Intern | Bank of Africa Mali, head office | Apr 2024 - May 2025
+- Provided first-level support to head-office users
+Systems and Network Administrator, Intern | Groupe PRIMA S.A. | Jul - Nov 2023
+- Joined client PCs to Active Directory and structured Organizational Units
+- Deployed Group Policy security policies across the fleet
+- Built a client-to-site VPN and network filtering with pfSense; monitored and troubleshot the network
+Network and Telecom Technician | HUTACOM Technologie Sarl | Jul 2022 - May 2023
+- Deployed and connected FTTH fibre; installed and maintained IP video surveillance
+
+PROJECTS
+- Site-to-site IPsec VPN between two FortiGate firewalls with OSPF and VLAN segmentation
+- Cisco 7200 lab: site-to-site VPN with OSPF and AES-256 IPsec tunnel
+- Authored a Windows Server 2019 domain controller guide (AD, Hyper-V) and led a webinar on it
+
+EDUCATION
+Master 1, Computer Systems and Security | ESGIC Mali | 2024
+Professional Bachelor, Networks and Telecommunications | ESGIC Mali | 2024 (Excellent)
+DUT, Networks | ESGIC Mali | 2023 (Good)
+
+CERTIFICATIONS
+Fortinet NSE 1, 2, 3 (Oct 2026) | Cisco: Network Support and Security (Jan 2026), Introduction to Cybersecurity (Sep 2024), CCNA Introduction to Networks (Nov 2023), Learn-A-Thon 2026
+
+LANGUAGES
+French (fluent), English (professional technical)`;
+const CL=()=>`Subject: Application, Network and Systems Support (NOC 22220) | RCIP / FCIP
+
+Hello,
+
+I am applying for the network and systems role at your organization. I support critical infrastructure at Bank of Africa Mali, working with Windows Server, Active Directory, Group Policy, Cisco, FortiGate and pfSense, and I hold Fortinet NSE 1-3 certification.
+
+I am applying through the Rural Community Immigration Pilot / Francophone Community Immigration Pilot. My education assessment and language tests are underway, and I can discuss a full-time, non-seasonal offer (IMM 0247) with your team.
+
+I would welcome a short call to show how I can keep your network secure and available.
+
+Sincerely,
+Modibo Dolo
+dolomodibo33@gmail.com | +223 82 12 56 73`;
+const OEN=`Hello, I am a network and systems administrator (Fortinet NSE 1-3, Cisco, Windows Server, Active Directory) with experience supporting critical infrastructure at a major bank. I am applying through the RCIP/FCIP pilot and my education assessment and language tests are in progress. Could we talk about how I can support your IT team?`;
+const OFR=`Bonjour, je suis administrateur systèmes et réseaux (Fortinet NSE 1-3, Cisco, Windows Server, Active Directory) et j’ai soutenu l’infrastructure critique d’une grande banque. Je candidate via le PPICR/PPICF ; mon évaluation des diplômes et mes tests de langue sont en cours. Pouvons-nous discuter de ma contribution à votre équipe TI ?`;
+const def=()=>({t:{},d:{},f:{},li:{},crm:[],nclc:0,eca:0,auto:15,city:'sudbury',noc:'22220',fam:1,rate:430,usd:.72,sv:0,cv:CV(),cl:CL(),prof:PROF,totp:null,rec:[]});
+/* ---------- Gate: setup, login, MFA ---------- */
+const GC=h=>{$('#gate').innerHTML=`<div class="min-h-screen grid place-items-center p-4"><div class="g p-6 w-full max-w-md">${h}</div></div>`};
+const IMPB=`<label class="b2 block text-center mt-3 cursor-pointer text-sm">Importer un coffre (.vault)<input type="file" class="hidden" accept=".vault" onchange="imp(this)"></label>`;
+async function gate(){$('#gate').classList.remove('hidden');(await dget('meta'))?loginUI():setupUI()}
+function strength(pw){let p=0;if(/[a-z]/.test(pw))p+=26;if(/[A-Z]/.test(pw))p+=26;if(/\d/.test(pw))p+=10;if(/[^A-Za-z0-9]/.test(pw))p+=32;return Math.round(pw.length*Math.log2(p||1))}
+function meter(){const b=strength($('#p1').value);$('#mt').style.width=Math.min(100,b/80*100)+'%';$('#mt').style.background=b<50?'#F43F5E':b<70?'#F97316':'#10B981';$('#mb').textContent=b+' bits, '+(b<50?'faible':b<70?'moyen':'fort')}
+function setupUI(){GC(`<h1 class="text-xl font-bold">Initialiser le coffre sécurisé</h1><p class="text-sm text-slate-400 mt-1">Chiffrement AES-256-GCM sur cet appareil. Aucune donnée ne quitte votre navigateur. Mot de passe perdu : données perdues.</p><input id="p1" type="password" class="i mt-4" placeholder="Mot de passe maître (12 caractères min.)" oninput="meter()" autocomplete="new-password"><div class="h-1.5 rounded bg-white/10 mt-2"><div id="mt" class="h-full rounded" style="width:0"></div></div><div id="mb" class="m text-xs text-slate-400 mt-1">0 bits</div><input id="p2" type="password" class="i mt-3" placeholder="Confirmer le mot de passe" autocomplete="new-password"><label class="flex gap-2 text-sm mt-3"><input id="tp" type="checkbox" checked>Activer l’application d’authentification (TOTP)</label><button class="b w-full mt-4" onclick="mk()">Créer le coffre</button>${IMPB}<div id="ge" class="text-rose-400 text-sm mt-2"></div>`)}
+async function mk(){const a=$('#p1').value,e=$('#ge'),tp=$('#tp').checked;if(a.length<12||strength(a)<60){e.textContent='Mot de passe trop faible : 12 caractères et 60 bits minimum.';return}if(a!=$('#p2').value){e.textContent='Les deux mots de passe diffèrent.';return}e.textContent='Dérivation de la clé (310 000 itérations)…';await new Promise(r=>setTimeout(r,40));const salt=rnd(16);KEY=await kdf(a,salt);S=def();PEND={salt};if(!tp)return done();const rec=Array.from({length:8},()=>[...rnd(5)].map(x=>x.toString(16).padStart(2,'0')).join('').replace(/(.{5})(.{5})/,'$1-$2'));S.rec=await Promise.all(rec.map(sha));PEND.sec=b32e(rnd(20));mfaUI(rec)}
+function mfaUI(rec){const uri=`otpauth://totp/Canada2027:coffre?secret=${PEND.sec}&issuer=Canada2027&algorithm=SHA1&digits=6&period=30`;GC(`<h2 class="text-lg font-bold">Lier votre application d’authentification</h2><p class="text-sm text-slate-400 mt-1">Scannez avec Google Authenticator, Microsoft Authenticator ou Authy.</p><div id="qr" class="bg-white p-3 rounded-lg w-fit mx-auto mt-3"></div><div class="m text-xs text-center text-slate-400 mt-2 break-all">${PEND.sec}</div><div class="text-sm mt-3">Codes de récupération à usage unique (affichés une seule fois) :</div><div class="m grid grid-cols-2 gap-1 text-sm bg-black/30 p-3 rounded-lg mt-1">${rec.map(r=>`<span>${r}</span>`).join('')}</div><button class="b2 mt-2 text-sm" onclick="navigator.clipboard.writeText('${rec.join(' ')}');toast('Codes copiés')">Copier les codes</button><input id="tc" class="i m mt-3" inputmode="numeric" maxlength="6" placeholder="Code à 6 chiffres" onkeydown="event.key=='Enter'&&fin()"><button class="b w-full mt-3" onclick="fin()">Vérifier et activer</button><div id="ge" class="text-rose-400 text-sm mt-2"></div>`);new QRCode($('#qr'),{text:uri,width:176,height:176,correctLevel:QRCode.CorrectLevel.M})}
+async function fin(){if(!await totpOk(PEND.sec,$('#tc').value)){$('#ge').textContent='Code invalide : vérifiez l’heure de votre appareil.';return}S.totp=PEND.sec;done()}
+async function done(){await dput('meta',{salt:PEND.salt,it:310000});await save();PEND=null;enter()}
+function loginUI(){GC(`<h1 class="text-xl font-bold">Coffre verrouillé</h1><p class="text-sm text-slate-400 mt-1">Entrez votre mot de passe maître pour déchiffrer vos données.</p><input id="lp" type="password" class="i mt-4" placeholder="Mot de passe maître" autocomplete="current-password" onkeydown="event.key=='Enter'&&unlock()"><button id="lb" class="b w-full mt-3" onclick="unlock()">Déverrouiller</button><div id="ge" class="text-rose-400 text-sm mt-2"></div>${IMPB}`);lkTick()}
+function lkTick(){const l=LK(),r=Math.ceil((l.u-Date.now())/1000),b=$('#lb');if(!b)return;if(r>0){b.disabled=true;$('#ge').textContent=`Trop d’échecs (${l.n}). Réessayez dans ${r} s.`;setTimeout(lkTick,1000)}else{b.disabled=false;if(l.n&&!$('#ge').textContent)$('#ge').textContent=`${l.n} échec(s) enregistré(s).`}}
+async function unlock(){const e=$('#ge');if(LK().u>Date.now())return;e.textContent='Déchiffrement…';await new Promise(r=>setTimeout(r,40));const m=await dget('meta');let k;try{k=await kdf($('#lp').value,m.salt,m.it);S=JSON.parse(TD.decode(await unseal(await dget('state'),k)))}catch(x){S=null;fail();loginUI();$('#ge').textContent='Mot de passe incorrect.';return}KEY=k;if(!S.totp)return enter();GC(`<h2 class="text-lg font-bold">Vérification en deux étapes</h2><p class="text-sm text-slate-400 mt-1">Code à 6 chiffres de votre application, ou code de récupération.</p><input id="mc" class="i m mt-4" autocomplete="one-time-code" onkeydown="event.key=='Enter'&&mfa()"><button class="b w-full mt-3" onclick="mfa()">Valider</button>`)}
+async function mfa(){const v=$('#mc').value.trim();let ok=false;if(/^\d{6}$/.test(v))ok=await totpOk(S.totp,v);else{const i=S.rec.indexOf(await sha(v.toLowerCase()));if(i>=0){S.rec.splice(i,1);await save();ok=true;toast('Code de récupération consommé : '+S.rec.length+' restant(s)')}}if(ok)return enter();fail();S=null;KEY=null;loginUI();$('#ge').textContent='Code invalide.'}
+function enter(){localStorage.removeItem('c27lk');$('#gate').innerHTML='';$('#gate').classList.add('hidden');$('#app').classList.remove('hidden');arm();go('dash')}
+function lock(){KEY=null;S=null;clearTimeout(timer);urls.forEach(u=>URL.revokeObjectURL(u));urls=[];if(map){map.remove();map=null}$('#app').classList.add('hidden');$('#body').innerHTML='';$('#modal').innerHTML='';$('#cvout').textContent='';gate()}
+function arm(){clearTimeout(timer);if(S)timer=setTimeout(lock,S.auto*60000)}
+['click','keydown','mousemove','touchstart'].forEach(ev=>addEventListener(ev,()=>{if(S)arm()},{passive:true}));
+/* ---------- App shell ---------- */
+const tabs={dash:['Tableau de bord',vDash],map:['Carte des communautés',vMap],jobs:['Emplois et CRM',vJobs],cv:['CV et lettre',vCv],docs:['Documents et fonds',vDocs],rules:['Règles et anti-fraude',vRules],sec:['Sécurité',vSec]};
+function go(t){if(!S)return;if(t)tab=t;if(map){map.remove();map=null}$('#nav').innerHTML=Object.entries(tabs).map(([k,v])=>`<button onclick="go('${k}')" class="tb ${k==tab?'on':''}">${v[0]}</button>`).join('');$('#body').innerHTML=tabs[tab][1]();if(tab=='map')initMap();if(tab=='dash'){tickCd();const g=$('#gc');if(g)setTimeout(()=>g.style.strokeDashoffset=326.7*(1-score()/100),60)}if(window.lucide)lucide.createIcons()}
+const tg=(o,k,v)=>{S[o][k]=v?1:0;save();go()};
+function score(){const p=a=>a.length?a.filter(x=>S.t[x[0]]).length/a.length:0;return Math.round(100*(.4*p(T)+.25*D.filter(d=>S.d[d[0]]).length/D.length+.15*Math.min(S.nclc,7)/7+.1*S.eca+.1*LI.filter(x=>S.li[x[0]]).length/LI.length))}
+function tickCd(){const el=$('#cd');if(!el)return;const d=new Date(2027,0,1)-Date.now(),z=n=>String(n).padStart(2,'0');el.textContent=d<=0?'Ouvert':`${Math.floor(d/864e5)}j ${z(Math.floor(d/36e5)%24)}h ${z(Math.floor(d/6e4)%60)}m ${z(Math.floor(d/1e3)%60)}s`}
+function vDash(){const p=score();return `<div class="grid md:grid-cols-3 gap-4"><div class="g p-5 md:col-span-2"><div class="text-sm text-slate-400">Ouverture de la période d’admission : 1er janvier 2027</div><div id="cd" class="m text-4xl sm:text-5xl font-semibold mt-2 text-orange-400"></div><div class="grid sm:grid-cols-2 gap-3 mt-5"><label class="text-sm">Niveau NCLC atteint (le plus bas des 4 compétences)<select class="i mt-1" onchange="S.nclc=+this.value;save();go()">${[0,1,2,3,4,5,6,7,8,9,10].map(n=>`<option ${S.nclc==n?'selected':''}>${n}</option>`).join('')}</select></label><label class="flex items-center gap-2 text-sm sm:mt-6"><input type="checkbox" ${S.eca?'checked':''} onchange="S.eca=this.checked?1:0;save();go()">ECA (WES) obtenue</label></div></div>
+<div class="g p-5 flex flex-col items-center"><svg viewBox="0 0 120 120" class="w-40 h-40" role="img" aria-label="Score de préparation ${p}%"><circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="10"/><circle id="gc" cx="60" cy="60" r="52" fill="none" stroke="${p>=70?'#10B981':'#F97316'}" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 1s"/><text x="60" y="68" text-anchor="middle" class="m" fill="#fff" font-size="26">${p}%</text></svg><div class="text-sm text-slate-400">Score de préparation</div></div></div>
+<div class="g p-5 mt-4"><div class="font-bold">${esc(S.prof.name)}</div><div class="text-sm text-slate-400">${esc(S.prof.headline)}</div><div class="flex flex-wrap gap-2 mt-3">${S.prof.certs.map(c=>`<span class="m text-xs px-2 py-1 rounded-full border border-cyan-500/40 text-cyan-300">${esc(c)}</span>`).join('')}${S.prof.skills.map(c=>`<span class="m text-xs px-2 py-1 rounded-full border border-white/15">${esc(c)}</span>`).join('')}</div><div class="text-xs text-slate-400 mt-3">${esc(S.prof.langs)}</div></div>
+<div class="grid lg:grid-cols-2 gap-4 mt-4">${R.map((ph,i)=>`<div class="g p-5"><h2 class="font-bold text-orange-300">${ph[0]}</h2>${ph[1].map((t,j)=>`<label class="flex gap-2 py-1.5 text-sm"><input type="checkbox" ${S.t['t'+i+'_'+j]?'checked':''} onchange="tg('t','t${i}_${j}',this.checked)"><span>${t}</span></label>`).join('')}</div>`).join('')}</div>`}
+/* ---------- Map ---------- */
+function vMap(){return `<div class="flex flex-wrap gap-2 mb-3">${[['ALL','Toutes'],['DUAL','Double avantage'],['PPICF','FCIP / PPICF'],['PPICR','RCIP / PPICR']].map(f=>`<button class="tb ${f[0]==flt?'on':''}" onclick="flt='${f[0]}';drawM()">${f[1]}</button>`).join('')}</div><div class="grid lg:grid-cols-3 gap-4"><div id="map" class="g lg:col-span-2" style="height:480px"></div><div id="intel" class="g p-5"></div></div><div id="dir" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2 mt-4"></div><p class="text-xs text-slate-500 mt-3">Vérifiez la liste officielle des communautés participantes sur canada.ca avant toute démarche.</p>`}
+function initMap(){map=L.map('map').setView([49,-90],4);L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',maxZoom:12}).addTo(map);lg=L.layerGroup().addTo(map);drawM();pick(S.city,0)}
+function drawM(){lg.clearLayers();const l2=C.filter(c=>flt=='ALL'||c[3]==flt);l2.forEach(c=>L.marker([c[4],c[5]],{icon:L.divIcon({className:'',html:`<span class="mk" style="--c:${COL[c[3]]}"></span>`,iconSize:[16,16]})}).on('click',()=>pick(c[0],0)).addTo(lg));$('#dir').innerHTML=l2.map(c=>`<button class="g p-3 text-left text-sm" onclick="pick('${c[0]}',1)"><b>${c[1]}</b><div class="text-xs" style="color:${COL[c[3]]}">${c[2]}, ${PL[c[3]]}</div></button>`).join('');document.querySelectorAll('.tb').forEach(b=>{if(b.getAttribute('onclick')&&b.getAttribute('onclick').startsWith('flt='))b.classList.toggle('on',b.getAttribute('onclick').includes("'"+flt+"'"))})}
+function pick(id,fly){const c=C.find(x=>x[0]==id);if(!c)return;if(S.city!=id){S.city=id;save()}if(fly&&map)map.flyTo([c[4],c[5]],8);$('#intel').innerHTML=`<div class="text-xs font-semibold" style="color:${COL[c[3]]}">${PL[c[3]]}</div><h3 class="text-xl font-bold">${c[1]}</h3><div class="text-slate-400 text-sm">${PV[c[2]]}</div>${c[3]=='DUAL'?'<div class="mt-3 p-2 rounded-lg bg-orange-500/15 border border-orange-500/40 text-sm text-orange-200">Double avantage : votre français courant et votre profil TI comptent pour les deux programmes.</div>':''}<div class="mt-3 text-sm"><span class="text-slate-400">Potentiel d’embauche TI (estimation)</span> <span class="m text-cyan-300">${'●'.repeat(c[7])+'○'.repeat(3-c[7])}</span></div><div class="mt-2 text-sm"><span class="text-slate-400">Secteurs prioritaires :</span> ${c[8]}</div><div class="mt-4 flex flex-wrap gap-2"><a class="b" target="_blank" rel="noopener noreferrer" href="${c[6]}">Portail économique</a><a class="b2" target="_blank" rel="noopener noreferrer" href="https://www.canada.ca/en/sr/srb.html?q=${encodeURIComponent('designated employers '+c[1])}">Registre des employeurs</a><button class="b2" onclick="go('jobs')">Chercher des emplois</button></div>`}
+/* ---------- Jobs, LinkedIn, CRM ---------- */
+function vJobs(){const n=NOC.find(x=>x[0]==S.noc),c=C.find(x=>x[0]==S.city),city=c[1].split(' (')[0]+', '+c[2],q=`(${n[4]}) OR (${n[5]})`,e=encodeURIComponent,rows=S.crm.filter(r=>!cf||r.y==cf),a='target="_blank" rel="noopener noreferrer"';
+return `<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-3">${NOC.map(x=>`<button onclick="S.noc='${x[0]}';save();go()" class="g p-4 text-left ${x[0]==S.noc?'!border-orange-500':''}"><div class="m text-orange-400 font-semibold">NOC ${x[0]}</div><div class="text-sm font-semibold mt-1">${x[1]}</div><div class="m text-xs text-slate-400 mt-2">TEER ${x[2]}, RCIP NCLC ${x[3]}, FCIP NCLC 5 (FR)</div></button>`).join('')}</div><p class="text-xs text-slate-500 mt-2">Seuils de langue à confirmer sur canada.ca selon votre communauté.</p>
+<div class="g p-5 mt-4"><h2 class="font-bold">Lanceur de recherche d’emploi</h2><select class="i mt-3 sm:w-80" onchange="S.city=this.value;save();go()">${C.map(x=>`<option value="${x[0]}" ${x[0]==S.city?'selected':''}>${x[1]}, ${x[2]}</option>`).join('')}</select><div class="flex flex-wrap gap-2 mt-3"><a class="b" ${a} href="https://www.linkedin.com/jobs/search/?keywords=${e(q)}&location=${e(city+', Canada')}">LinkedIn Jobs</a><a class="b" ${a} href="https://www.jobbank.gc.ca/jobsearch/jobsearch?searchstring=${e(n[4].split(' OR ')[0])}&locationstring=${e(city)}">Guichet-Emplois</a><a class="b" ${a} href="https://ca.indeed.com/jobs?q=${e(q)}&l=${e(city)}">Indeed Canada</a></div><div class="m text-xs text-cyan-300 mt-3 break-words">${esc(q)}</div></div>
+<div class="grid lg:grid-cols-2 gap-4 mt-4"><div class="g p-5"><h2 class="font-bold">Optimiseur de profil LinkedIn</h2>${LI.map(x=>`<label class="flex gap-2 py-1.5 text-sm"><input type="checkbox" ${S.li[x[0]]?'checked':''} onchange="tg('li','${x[0]}',this.checked)"><span>${x[1]}</span></label>`).join('')}</div><div class="g p-5"><h2 class="font-bold">Messages à copier</h2><pre id="o1" class="text-xs whitespace-pre-wrap mt-2 text-slate-300">${OEN}</pre><button class="b2 mt-2" onclick="cp('#o1')">Copier (EN)</button><pre id="o2" class="text-xs whitespace-pre-wrap mt-3 text-slate-300">${OFR}</pre><button class="b2 mt-2" onclick="cp('#o2')">Copier (FR)</button></div></div>
+<div class="g p-5 mt-4"><h2 class="font-bold">CRM des employeurs désignés</h2><div class="grid sm:grid-cols-5 gap-2 mt-3"><input id="cc" class="i" placeholder="Entreprise"><input id="cr" class="i" placeholder="Poste"><select id="cy" class="i">${C.map(x=>`<option>${x[1]}</option>`).join('')}</select><input id="cu" class="i" placeholder="URL de l’offre ou LinkedIn"><button class="b" onclick="crmAdd()">Ajouter</button></div><select class="i mt-3 sm:w-72" onchange="cf=this.value;go()"><option value="">Toutes les villes</option>${C.map(x=>`<option ${cf==x[1]?'selected':''}>${x[1]}</option>`).join('')}</select><div class="grid gap-2 mt-3">${rows.length?rows.map(r=>`<div class="bg-white/5 rounded-lg p-3 flex flex-wrap items-center gap-2 text-sm"><b>${esc(r.c)}</b><span class="text-slate-400">${esc(r.r)}, ${esc(r.y)}</span>${r.u?`<a class="text-cyan-300 underline" ${a} href="${esc(r.u)}">Lien</a>`:''}<select class="i !w-auto ml-auto" onchange="crmSet(${r.id},this.value)">${ST.map((s,k)=>`<option value="${k}" ${k==r.s?'selected':''}>${s}</option>`).join('')}</select><button class="b2" onclick="crmDel(${r.id})">Supprimer</button></div>`).join(''):'<div class="text-sm text-slate-400">Aucune candidature suivie. Ajoutez un employeur désigné ci-dessus.</div>'}</div></div>`}
+function crmAdd(){const v=i=>$('#'+i).value.trim();if(!v('cc')||!v('cr'))return toast('Entreprise et poste requis');let u=v('cu');if(u&&!/^https?:\/\//i.test(u))u='https://'+u;S.crm.unshift({id:Date.now(),c:v('cc'),y:$('#cy').value,r:v('cr'),u,s:0});save();go()}
+const crmSet=(id,s)=>{S.crm.find(r=>r.id==id).s=+s;save();toast('Statut : '+ST[+s])},crmDel=id=>{S.crm=S.crm.filter(r=>r.id!=id);save();go()};
+const cp=s=>{navigator.clipboard.writeText($(s).value!==undefined&&$(s).tagName=='TEXTAREA'?$(s).value:$(s).textContent);toast('Copié')};
+/* ---------- CV studio ---------- */
+function vCv(){return `<div class="grid lg:grid-cols-2 gap-4">${[['cv','CV canadien (sans photo, âge, état civil ni nationalité)'],['cl','Lettre de motivation']].map(x=>`<div class="g p-5"><h2 class="font-bold">${x[1]}</h2><textarea id="x${x[0]}" class="i m !text-xs mt-3" rows="26" onchange="S.${x[0]}=this.value;save()">${esc(S[x[0]])}</textarea><div class="flex gap-2 mt-3"><button class="b2" onclick="cp('#x${x[0]}')">Copier</button><button class="b" onclick="pr('x${x[0]}')">Imprimer / PDF</button></div></div>`).join('')}</div><p class="text-xs text-slate-500 mt-3">Ajoutez vos résultats chiffrés réels (parc géré, disponibilité, délais) : ils ne figurent pas dans votre CV source.</p>`}
+function pr(id){$('#cvout').textContent=$('#'+id).value;print()}
+/* ---------- Documents & funds ---------- */
+async function up(id,inp){const f=inp.files[0];if(!f)return;if(f.size>25e6)return toast('Fichier de plus de 25 Mo');await dput('f:'+id,await seal(new Uint8Array(await f.arrayBuffer())));S.f[id]={n:f.name,t:f.type,s:f.size};S.d[id]=1;await save();go();toast('Document chiffré et enregistré')}
+async function view(id){const m=S.f[id],u=URL.createObjectURL(new Blob([await unseal(await dget('f:'+id))],{type:m.t||'application/octet-stream'}));urls.push(u);$('#modal').innerHTML=`<div class="fixed inset-0 z-50 bg-black/85 flex flex-col p-4"><button class="b self-end mb-2" onclick="closeM()">Fermer</button>${(m.t||'').startsWith('image/')?`<img alt="${esc(m.n)}" src="${u}" class="max-h-full max-w-full m-auto object-contain">`:`<iframe title="${esc(m.n)}" src="${u}" class="flex-1 bg-white rounded"></iframe>`}</div>`}
+const closeM=()=>{urls.forEach(u=>URL.revokeObjectURL(u));urls=[];$('#modal').innerHTML=''};
+async function rm(id){await ddel('f:'+id);delete S.f[id];S.d[id]=0;await save();go()}
+function vDocs(){const need=F[S.fam],fc=need*S.rate,pc=Math.min(100,Math.round(S.sv/fc*100)),n=x=>Math.round(x).toLocaleString('fr-CA');
+return `<div class="g p-5"><h2 class="font-bold">Coffre de documents chiffrés</h2><div class="mt-3">${D.map(d=>{const f=S.f[d[0]];return `<div class="flex flex-wrap items-center gap-2 text-sm py-2 border-b border-white/5"><input type="checkbox" ${S.d[d[0]]?'checked':''} onchange="tg('d','${d[0]}',this.checked)"><span class="flex-1">${d[1]}</span>${f?`<span class="m text-xs text-slate-400">${esc(f.n)} (${Math.ceil(f.s/1024)} Ko)</span><button class="b2" onclick="view('${d[0]}')">Voir</button><button class="b2" onclick="rm('${d[0]}')">Supprimer</button>`:`<label class="b2">Téléverser<input type="file" class="hidden" accept=".pdf,.png,.jpg,.jpeg" onchange="up('${d[0]}',this)"></label>`}</div>`}).join('')}</div></div>
+<div class="g p-5 mt-4"><h2 class="font-bold">Fonds d’établissement</h2><div class="grid sm:grid-cols-4 gap-3 mt-3"><label class="text-sm">Taille du foyer<select class="i mt-1" onchange="S.fam=+this.value;save();go()">${[1,2,3,4].map(k=>`<option ${k==S.fam?'selected':''}>${k}</option>`).join('')}</select></label><label class="text-sm">FCFA pour 1 CAD<input class="i m mt-1" type="number" value="${S.rate}" onchange="S.rate=+this.value||430;save();go()"></label><label class="text-sm">USD pour 1 CAD<input class="i m mt-1" type="number" step="0.01" value="${S.usd}" onchange="S.usd=+this.value||.72;save();go()"></label><label class="text-sm">Épargne (FCFA)<input class="i m mt-1" type="number" value="${S.sv}" onchange="S.sv=+this.value||0;save();go()"></label></div><div class="m mt-4 text-lg"><span class="text-orange-400">${need.toLocaleString('fr-CA')} CAD</span> = ${n(fc)} FCFA = ${n(need*S.usd)} USD</div><div class="h-2 rounded bg-white/10 mt-3"><div class="h-full rounded bg-emerald-500" style="width:${pc}%"></div></div><div class="m text-xs text-slate-400 mt-1">${pc}% couvert</div><p class="text-xs text-slate-500 mt-2">Vérifiez le barème IRCC avant le dépôt : il est mis à jour chaque année.</p></div>`}
+/* ---------- Rules & security ---------- */
+function vRules(){return `<div class="g p-5 border-emerald-500/40"><h2 class="font-bold text-emerald-400">Bouclier anti-fraude</h2><p class="text-sm mt-1">Aucune offre, place ou recommandation communautaire ne s’achète. Exigez une offre à temps plein, non saisonnière, d’un employeur désigné, avec un poste aligné sur votre CNP.</p></div><div class="grid gap-3 mt-4">${RU.map(r=>`<div class="grid md:grid-cols-2 gap-3"><div class="g p-4 text-sm border-emerald-500/30"><b class="text-emerald-400">À faire</b><p class="mt-1">${r[0]}</p></div><div class="g p-4 text-sm border-rose-500/30"><b class="text-rose-400">À ne jamais faire</b><p class="mt-1">${r[1]}</p></div></div>`).join('')}</div>`}
+function vSec(){return `<div class="g p-5 grid gap-4 max-w-xl"><div class="text-sm">Authentification TOTP : <b class="${S.totp?'text-emerald-400':'text-rose-400'}">${S.totp?'active':'désactivée'}</b>${S.totp?`, ${S.rec.length} code(s) de récupération restant(s)`:''}</div><label class="text-sm">Verrouillage automatique après inactivité<select class="i mt-1" onchange="S.auto=+this.value;save();arm()">${[5,15,30].map(n=>`<option value="${n}" ${n==S.auto?'selected':''}>${n} minutes</option>`).join('')}</select></label><button class="b" onclick="lock()">Verrouiller maintenant</button><button class="b2" onclick="exp()">Exporter le coffre chiffré (.vault)</button><label class="b2 text-center cursor-pointer">Importer un coffre (.vault)<input type="file" class="hidden" accept=".vault" onchange="imp(this)"></label><button class="b2 !text-rose-300" onclick="wipe()">Effacer le coffre de cet appareil</button><p class="text-xs text-slate-500">AES-256-GCM, PBKDF2-SHA256 (310 000 itérations), IV aléatoire par chiffrement, TOTP RFC 6238. Rien ne quitte votre navigateur.</p></div>`}
+async function exp(){const a=await dall(),o={};for(const k in a)o[k]=Object.fromEntries(Object.entries(a[k]).map(([x,y])=>[x,y instanceof Uint8Array?{b:b64(y)}:y]));const u=URL.createObjectURL(new Blob([JSON.stringify({k:'c27-vault',v:1,d:o})],{type:'application/octet-stream'})),l=document.createElement('a');l.href=u;l.download='canada2027-'+new Date().toISOString().slice(0,10)+'.vault';l.click();setTimeout(()=>URL.revokeObjectURL(u),5000);toast('Coffre chiffré exporté')}
+async function imp(inp){const f=inp.files[0];if(!f)return;try{const j=JSON.parse(await f.text());if(j.k!='c27-vault')throw 0;await dclr();for(const k in j.d)await dput(k,Object.fromEntries(Object.entries(j.d[k]).map(([x,y])=>[x,y&&y.b!==undefined?ub(y.b):y])));localStorage.removeItem('c27lk');lock();toast('Coffre importé : déverrouillez-le avec son mot de passe')}catch(e){toast('Fichier .vault invalide')}}
+async function wipe(){if(confirm('Effacer définitivement le coffre et tous les documents de cet appareil ?')){await dclr();localStorage.removeItem('c27lk');lock()}}
+setInterval(tickCd,1000);if(window.lucide)lucide.createIcons();gate();
+</script>
+<script>
+(()=>{const R=document.documentElement,dev=$('#dev'),sh=[...document.querySelectorAll('#stage .sh')],rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+let mx=0,my=0,tx=0,ty=0,p=0,tp=0,lc=null;
+addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5;R.style.setProperty('--mx',e.clientX+'px');R.style.setProperty('--my',e.clientY+'px');const c=e.target.closest?e.target.closest('.g'):null;if(lc&&lc!==c){lc.style.removeProperty('--lx');lc.style.removeProperty('--ly')}if(c){const r=c.getBoundingClientRect();c.style.setProperty('--lx',e.clientX-r.left+'px');c.style.setProperty('--ly',e.clientY-r.top+'px')}lc=c},{passive:true});
+const sc=()=>{tp=scrollY/Math.max(1,R.scrollHeight-innerHeight)};addEventListener('scroll',sc,{passive:true});addEventListener('resize',sc);sc();
+const draw=()=>{const w=innerWidth,m=w<700,s=(m?.5:1.2)*(1-p*.3),x=Math.cos(p*9.42)*(m?w*.18:w*.27);dev.style.transform=`translate3d(${x}px,${Math.sin(p*12.6)*innerHeight*.07}px,0) scale(${s}) rotateX(${14+Math.sin(p*18)*14-ty*24}deg) rotateY(${-30+p*900+tx*34}deg) rotateZ(${-5+Math.sin(p*9)*4}deg)`;sh.forEach(e=>{const k=+e.dataset.k;e.style.translate=`${Math.sin(p*6.28*Math.abs(k)+k)*70+tx*60*k}px ${Math.cos(p*6.28*Math.abs(k))*110-p*innerHeight*.15*k+ty*50*k}px`})};
+const loop=()=>{p+=(tp-p)*.07;tx+=(mx-tx)*.06;ty+=(my-ty)*.06;draw();requestAnimationFrame(loop)};
+rm?draw():loop();
+if(!rm){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.1}),b=$('#body'),rv=()=>{if(!b.children.length){rv.k=null;return}const f=rv.k!==tab;rv.k=tab;b.querySelectorAll('.g').forEach((e,i)=>{if(e.id=='map'||!f)e.classList.add('in');else{e.classList.add('rv');e.style.setProperty('--rx',(i%2?70:-70)+'px');io.observe(e)}})};new MutationObserver(rv).observe(b,{childList:true})}
+})();
+</script>
+<script>(()=>{
+const D=document,Q=s=>D.querySelector(s),root=D.documentElement,reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+let nx=0,ny=0,pr=0,tt=0,lx=0,ly=0,dev,sh,blades,ml,sc,cam,R;const parts=[];
+addEventListener('pointermove',e=>{nx=e.clientX/innerWidth*2-1;ny=-(e.clientY/innerHeight*2-1);root.style.setProperty('--mx',e.clientX+'px');root.style.setProperty('--my',e.clientY+'px');const c=e.target.closest&&e.target.closest('.g');if(c){const r=c.getBoundingClientRect();c.style.setProperty('--x',e.clientX-r.left+'px');c.style.setProperty('--y',e.clientY-r.top+'px')}},{passive:true});
+const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.06});
+const tag=()=>D.querySelectorAll('#body .g:not([data-rv])').forEach(el=>{el.dataset.rv=1;el.classList.add('rv');if([...el.parentElement.children].indexOf(el)%2)el.classList.add('r');io.observe(el)});
+new MutationObserver(tag).observe(Q('#body'),{childList:true});tag();
+Q('#nav').addEventListener('click',e=>{if(e.target.closest('.tb')&&scrollY<innerHeight*.6)setTimeout(()=>Q('#body').scrollIntoView({behavior:'smooth'}),60)});
+const cv=Q('#c3d'),hd=Q('#hd'),hero=Q('#hero'),bl=[...D.querySelectorAll('.blob')];
+try{if(!window.THREE)throw 0;R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true})}catch(e){R=null;cv.remove()}
+if(R){
+R.setPixelRatio(Math.min(devicePixelRatio,2));R.setClearColor(0,0);
+sc=new THREE.Scene();cam=new THREE.PerspectiveCamera(38,1,.1,60);cam.position.z=11;
+const rs=()=>{R.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()};addEventListener('resize',rs);rs();
+sc.add(new THREE.AmbientLight(0x8b7cff,.6));
+const key=new THREE.DirectionalLight(0xffffff,.8);key.position.set(-4,5,6);sc.add(key);
+const rim=new THREE.PointLight(0xf97316,2.2,30);rim.position.set(4,-2,-3);sc.add(rim);
+ml=new THREE.PointLight(0xfff1e6,3.4,18);sc.add(ml);
+const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,metalness:.6,roughness:.3},o)),
+G=c=>new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:1.7,roughness:.4}),
+mesh=(g,m,x,y,z,p)=>{const o=new THREE.Mesh(g,m);o.position.set(x,y,z);p.add(o);return o},
+bx=(w,h,d,m,x,y,z,p)=>mesh(new THREE.BoxGeometry(w,h,d),m,x,y,z,p);
+const body=M(0x1d1760,{metalness:.8,roughness:.25}),dark=M(0x0a0720,{metalness:.5,roughness:.5}),or=G(0xf97316);
+dev=new THREE.Group();sc.add(dev);
+bx(3.4,.8,1.9,body,0,0,0,dev);bx(3,.06,.04,or,0,.26,.96,dev);
+for(let i=0;i<8;i++){const x=-1.26+i*.36;bx(.26,.2,.12,dark,x,-.14,.95,dev);bx(.08,.05,.05,G([0x10b981,0xf97316,0x22d3ee][i%3]),x,.04,.97,dev)}
+[[-1.35,-.28],[1.35,.28]].forEach(a=>{const c=mesh(new THREE.CylinderGeometry(.045,.06,1.9,14),dark,a[0],1.35,-.6,dev);c.rotation.z=a[1];mesh(new THREE.SphereGeometry(.09,16,16),or,a[0]-Math.sin(a[1])*.95,1.35+Math.cos(a[1])*.95,-.6,dev)});
+mesh(new THREE.TorusGeometry(.45,.05,12,48),or,0,.42,-.1,dev).rotation.x=Math.PI/2;
+mesh(new THREE.CylinderGeometry(.4,.4,.03,40),dark,0,.41,-.1,dev);
+blades=new THREE.Group();blades.position.set(0,.45,-.1);dev.add(blades);
+for(let i=0;i<4;i++){const b=bx(.7,.02,.12,or,0,0,0,blades);b.rotation.y=i*Math.PI/4}
+mesh(new THREE.TorusGeometry(2.4,.025,8,90),or,0,-.95,0,dev).rotation.x=Math.PI/2;
+mesh(new THREE.CircleGeometry(2.3,64),new THREE.MeshBasicMaterial({color:0x7c3aed,transparent:true,opacity:.2}),0,-.96,0,dev).rotation.x=-Math.PI/2;
+sh=new THREE.Group();sc.add(sh);
+[[new THREE.BoxGeometry(1.1,1.1,1.1),M(0x4f3fd1,{roughness:.2}),-3.4,1.7,-1.5],[new THREE.BoxGeometry(.7,.7,.7),M(0x120d3a),3.6,-1.6,-2],[new THREE.SphereGeometry(.45,32,32),M(0x7c3aed,{roughness:.15}),3.2,1.9,-1],[new THREE.SphereGeometry(.28,24,24),or,-3.6,-1.7,-.5],[new THREE.SphereGeometry(.2,24,24),M(0xd946ef,{roughness:.2}),2.6,-2.5,0],[new THREE.TorusGeometry(.9,.12,16,60),M(0x6d5bff,{roughness:.3}),-2.8,-.5,-2.5],[new THREE.OctahedronGeometry(.55),M(0x22d3ee,{roughness:.2}),1.4,2.7,-1.5]].forEach((a,i)=>{const o=mesh(a[0],a[1],a[2],a[3],a[4],sh);o.userData={y:a[3],p:i*1.7};parts.push(o)});
+}
+(function loop(){requestAnimationFrame(loop);if(D.hidden)return;
+const sy=scrollY,h=root.scrollHeight-innerHeight,tp=h>0?Math.min(1,sy/h):0;pr+=(tp-pr)*.08;if(!reduce)tt+=.016;
+if(hd)hd.classList.toggle('sm',sy>30);
+if(hero){hero.style.opacity=Math.max(0,1-sy/(innerHeight*.7));hero.style.transform='translateY('+sy*.18+'px)'}
+bl.forEach((b,i)=>b.style.transform='translate3d(0,'+(-sy*(.06+i*.05))+'px,0)');
+if(!R)return;
+const nar=innerWidth/innerHeight<.9,k=Math.min(1,pr*5);
+dev.position.set(Math.cos(pr*12.57)*3.4*(nar?.3:1),Math.sin(pr*18.85)*.7+Math.sin(tt*.9)*.12+(nar?-1.5*(1-k):0),0);
+dev.scale.setScalar((1.25-.4*k)*(nar?.7:1));
+dev.rotation.set(-.18+Math.sin(pr*25)*.25+ny*.15,.6+pr*18.85+nx*.35+tt*.12,Math.sin(pr*15)*.12);
+if(!reduce)blades.rotation.y+=.06;
+sh.position.set(-dev.position.x*.4,pr*2.5,0);sh.rotation.y=pr*1.5+nx*.2;
+parts.forEach(o=>{o.position.y=o.userData.y+Math.sin(tt+o.userData.p)*.3;if(!reduce){o.rotation.x+=.006;o.rotation.y+=.008}});
+lx+=(nx*7-lx)*.12;ly+=(ny*4-ly)*.12;ml.position.set(lx,ly,4.5);
+R.render(sc,cam)})();
+})();</script></body></html>
